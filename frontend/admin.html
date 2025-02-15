@@ -42,6 +42,8 @@
         </div>
     </div>
     <script>
+        const backendUrl = 'https://alipay-service.onrender.com'; // Updated Render backend URL
+
         document.getElementById('add-item-form').addEventListener('submit', function(event) {
             event.preventDefault();
             const category = document.getElementById('category-input').value;
@@ -55,7 +57,7 @@
             formData.append('price', price);
             formData.append('picture', picture);
 
-            fetch('http://localhost:3000/add-item', {
+            fetch(`${backendUrl}/add-item`, {
                 method: 'POST',
                 body: formData
             })
@@ -80,7 +82,7 @@
         });
 
         function fetchItems() {
-            fetch('http://localhost:3000/items')
+            fetch(`${backendUrl}/items`)
                 .then(response => response.json())
                 .then(data => {
                     const container = document.getElementById('items-container');
@@ -88,7 +90,7 @@
                     data.items.forEach(item => {
                         const itemElement = document.createElement('div');
                         itemElement.innerHTML = `
-                            <img src="${item.picture}" alt="${item.item}" style="width: 100px; height: 100px;">
+                            <img src="${backendUrl}${item.picture}" alt="${item.item}" style="width: 100px; height: 100px;">
                             ${item.category} - ${item.item} - $${item.price}
                             <button onclick="removeItem('${item.item}')">Remove</button>
                             <button onclick="toggleSoldOut('${item.item}')">${item.soldOut ? 'Mark as Available' : 'Mark as Sold Out'}</button>
@@ -103,7 +105,7 @@
         }
 
         function removeItem(itemName) {
-            fetch(`http://localhost:3000/remove-item`, {
+            fetch(`${backendUrl}/remove-item`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -125,7 +127,7 @@
         }
 
         function toggleSoldOut(itemName) {
-            fetch(`http://localhost:3000/toggle-sold-out`, {
+            fetch(`${backendUrl}/toggle-sold-out`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -147,7 +149,7 @@
         }
 
         function fetchOrders() {
-            fetch('http://localhost:3000/orders')
+            fetch(`${backendUrl}/orders`)
                 .then(response => response.json())
                 .then(data => {
                     const container = document.getElementById('orders-container');
