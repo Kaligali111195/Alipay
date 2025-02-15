@@ -103,6 +103,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
+                alert('An error occurred while processing the payment: ' + error.message);
             });
         }
 
@@ -146,8 +147,8 @@
                                     <button class="add-to-cart" onclick="addToCart('${item.item}', ${item.price}, 'Packed')">Packed</button>`}
                                 </div>
                                 <div class="item-picture">
-                                    <img src="${item.picture}" alt="${item.item}" style="width: 100px; height: 100px;">
-                                </div>
+                                    <img src="${backendUrl}${item.picture}" alt="${item.item}" style="width: 100px; height: 100px;">
+                                    </div>
                             `;
                             console.log('Item picture URL:', item.picture); // Log the picture URL
                             categoryContainer.appendChild(itemElement);
@@ -163,6 +164,7 @@
                 })
                 .catch(error => {
                     console.error('Error fetching items:', error);
+                    alert('An error occurred while fetching items: ' + error.message);
                 });
         });
 
