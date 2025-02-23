@@ -3,7 +3,8 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const mongoose = require('mongoose');
 const path = require('path');
-const cors = require('cors'); // Import cors
+const cors = require('cors');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,7 +32,7 @@ const itemSchema = new mongoose.Schema({
 
 const Item = mongoose.model('Item', itemSchema);
 
-app.use(cors()); // Enable CORS
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -87,6 +88,17 @@ app.post('/toggle-sold-out', (req, res) => {
         })
         .then(() => res.json({ success: true }))
         .catch(err => res.status(500).json({ success: false, message: err.message }));
+});
+
+// Handle 404 errors
+app.use((req, res, next) => {
+    res.status(404).json({ success: false, message: 'Not Found' });
+});
+
+// Handle other errors
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
 });
 
 app.listen(PORT, () => {
