@@ -90,7 +90,7 @@
                     data.items.forEach(item => {
                         const itemElement = document.createElement('div');
                         itemElement.innerHTML = `
-                            <img src="${backendUrl}${item.picture}" alt="${item.item}" style="width: 100px; height: 100px;">
+                            <img src="${item.picture}" alt="${item.item}" style="width: 100px; height: 100px;">
                             ${item.category} - ${item.item} - $${item.price}
                             <button onclick="removeItem('${item.item}')">Remove</button>
                             <button onclick="toggleSoldOut('${item.item}')">${item.soldOut ? 'Mark as Available' : 'Mark as Sold Out'}</button>
