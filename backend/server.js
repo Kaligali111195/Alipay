@@ -11,8 +11,36 @@ let items = [];
 let orders = [];
 let orderId = 1;
 
+const itemsFilePath = path.join(__dirname, 'items.json');
+const ordersFilePath = path.join(__dirname, 'orders.json');
+
+// Load items and orders from JSON files
+function loadItems() {
+    if (fs.existsSync(itemsFilePath)) {
+        const data = fs.readFileSync(itemsFilePath);
+        items = JSON.parse(data);
+    }
+}
+
+function loadOrders() {
+    if (fs.existsSync(ordersFilePath)) {
+        const data = fs.readFileSync(ordersFilePath);
+        orders = JSON.parse(data);
+        orderId = orders.length > 0 ? orders[orders.length - 1].id + 1 : 1;
+    }
+}
+
+// Save items and orders to JSON files
+function saveItems() {
+    fs.writeFileSync(itemsFilePath, JSON.stringify(items, null, 2));
+}
+
+function saveOrders() {
+    fs.writeFileSync(ordersFilePath, JSON.stringify(orders, null, 2));
+}
+
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors()); // Ensure CORS is enabled
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const storage = multer.diskStorage({
@@ -37,6 +65,7 @@ app.post('/add-item', upload.single('picture'), (req, res) => {
     const picture = req.file ? `/uploads/${req.file.filename}` : null;
     if (category && item && price && picture) {
         items.push({ category, item, price, picture, soldOut: false });
+        saveItems(); // Save items to JSON file
         console.log('Item added:', { category, item, price, picture });
         console.log('Picture path:', path.join(__dirname, picture));
         // Check if the file exists
@@ -53,6 +82,7 @@ app.post('/add-item', upload.single('picture'), (req, res) => {
 app.post('/remove-item', (req, res) => {
     const { item } = req.body;
     items = items.filter(i => i.item !== item);
+    saveItems(); // Save items to JSON file
     console.log('Item removed:', item);
     res.json({ success: true });
 });
@@ -62,6 +92,7 @@ app.post('/toggle-sold-out', (req, res) => {
     const itemToUpdate = items.find(i => i.item === item);
     if (itemToUpdate) {
         itemToUpdate.soldOut = !itemToUpdate.soldOut;
+        saveItems(); // Save items to JSON file
         console.log('Item status updated:', itemToUpdate);
         res.json({ success: true });
     } else {
@@ -74,6 +105,7 @@ app.post('/checkout', (req, res) => {
     const total = cart.reduce((sum, item) => sum + item.price, 0);
     const order = { id: orderId++, items: cart, total };
     orders.push(order);
+    saveOrders(); // Save orders to JSON file
     console.log('Order placed:', order);
     res.json({ success: true });
 });
@@ -87,6 +119,10 @@ app.use((err, req, res, next) => {
     console.error('Error:', err);
     res.status(500).json({ success: false, error: err.message });
 });
+
+// Load items and orders when the server starts
+loadItems();
+loadOrders();
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
