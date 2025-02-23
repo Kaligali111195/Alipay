@@ -30,7 +30,14 @@ const itemSchema = new mongoose.Schema({
     soldOut: Boolean
 });
 
+const orderSchema = new mongoose.Schema({
+    items: Array,
+    total: Number,
+    date: { type: Date, default: Date.now }
+});
+
 const Item = mongoose.model('Item', itemSchema);
+const Order = mongoose.model('Order', orderSchema);
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -90,7 +97,6 @@ app.post('/toggle-sold-out', (req, res) => {
         .catch(err => res.status(500).json({ success: false, message: err.message }));
 });
 
-// Add a /checkout endpoint
 app.post('/checkout', (req, res) => {
     const { cart } = req.body;
 
@@ -98,14 +104,18 @@ app.post('/checkout', (req, res) => {
         return res.status(400).json({ success: false, message: 'Cart is empty or invalid' });
     }
 
-    // Process the payment (this is a placeholder, replace with actual payment processing logic)
-    const paymentSuccess = true;
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const newOrder = new Order({ items: cart, total });
 
-    if (paymentSuccess) {
-        res.json({ success: true, message: 'Payment processed successfully' });
-    } else {
-        res.status(500).json({ success: false, message: 'Payment processing failed' });
-    }
+    newOrder.save()
+        .then(() => res.json({ success: true, message: 'Order placed successfully' }))
+        .catch(err => res.status(500).json({ success: false, message: err.message }));
+});
+
+app.get('/orders', (req, res) => {
+    Order.find()
+        .then(orders => res.json({ orders }))
+        .catch(err => res.status(500).json({ success: false, message: err.message }));
 });
 
 // Handle 404 errors
