@@ -27,13 +27,6 @@
             <div id="total-amount" class="total-amount"></div>
             <button id="checkout-button" class="checkout-button">Proceed to Checkout</button>
         </div>
-        <div id="payment-options" class="container" style="display: none;">
-            <h2>Select Payment Method</h2>
-            <button class="payment-button" onclick="processPayment('Alipay')">Alipay</button>
-            <button class="payment-button" onclick="processPayment('WeChat')">WeChat</button>
-            <button class="payment-button" onclick="processPayment('PayPal')">PayPal</button>
-            <button class="payment-button" onclick="processPayment('MasterCard')">MasterCard</button>
-        </div>
     </div>
     <script>
         let cart = [];
@@ -73,30 +66,19 @@
         }
 
         document.getElementById('checkout-button').addEventListener('click', function() {
-            const paymentOptions = document.getElementById('payment-options');
-            paymentOptions.style.display = 'block';
-        });
-
-        function processPayment(method) {
-            if (method === 'Alipay') {
-                window.location.href = 'alipay://';
-                return;
-            }
-
             fetch(`${backendUrl}/checkout`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ cart, method })
+                body: JSON.stringify({ cart })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Order placed successfully using ' + method);
+                    alert('Order placed successfully');
                     cart = [];
                     displayCart();
-                    document.getElementById('payment-options').style.display = 'none';
                 } else {
                     alert('Failed to place order');
                 }
@@ -105,7 +87,7 @@
                 console.error('Error:', error);
                 alert('An error occurred while processing the payment: ' + error.message);
             });
-        }
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
             fetch(`${backendUrl}/items`) // Ensure the correct URL
@@ -148,7 +130,7 @@
                                 </div>
                                 <div class="item-picture">
                                     <img src="${backendUrl}${item.picture}" alt="${item.item}" style="width: 100px; height: 100px;">
-                                    </div>
+                                </div>
                             `;
                             console.log('Item picture URL:', item.picture); // Log the picture URL
                             categoryContainer.appendChild(itemElement);
