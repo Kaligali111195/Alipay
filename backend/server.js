@@ -90,6 +90,24 @@ app.post('/toggle-sold-out', (req, res) => {
         .catch(err => res.status(500).json({ success: false, message: err.message }));
 });
 
+// Add a /checkout endpoint
+app.post('/checkout', (req, res) => {
+    const { cart } = req.body;
+
+    if (!cart || !Array.isArray(cart) || cart.length === 0) {
+        return res.status(400).json({ success: false, message: 'Cart is empty or invalid' });
+    }
+
+    // Process the payment (this is a placeholder, replace with actual payment processing logic)
+    const paymentSuccess = true;
+
+    if (paymentSuccess) {
+        res.json({ success: true, message: 'Payment processed successfully' });
+    } else {
+        res.status(500).json({ success: false, message: 'Payment processing failed' });
+    }
+});
+
 // Handle 404 errors
 app.use((req, res, next) => {
     res.status(404).json({ success: false, message: 'Not Found' });
