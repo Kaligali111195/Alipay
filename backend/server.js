@@ -35,6 +35,9 @@ app.use(cors()); // Enable CORS
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Serve static files from the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.post('/add-item', upload.single('picture'), (req, res) => {
     const { category, item, price } = req.body;
     const picture = req.file;
