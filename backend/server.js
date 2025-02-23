@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
 const fs = require('fs');
+const cloudinary = require('./cloudinaryConfig');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,9 +44,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files from the uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 app.post('/add-item', upload.single('picture'), (req, res) => {
     const { category, item, price } = req.body;
     const picture = req.file;
@@ -54,17 +52,23 @@ app.post('/add-item', upload.single('picture'), (req, res) => {
         return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
-    const newItem = new Item({
-        category,
-        item,
-        price: parseFloat(price),
-        picture: `/uploads/${picture.filename}`,
-        soldOut: false
-    });
+    cloudinary.uploader.upload(picture.path, { folder: 'items' }, (error, result) => {
+        if (error) {
+            return res.status(500).json({ success: false, message: 'Error uploading to Cloudinary' });
+        }
 
-    newItem.save()
-        .then(() => res.json({ success: true }))
-        .catch(err => res.status(500).json({ success: false, message: err.message }));
+        const newItem = new Item({
+            category,
+            item,
+            price: parseFloat(price),
+            picture: result.secure_url,
+            soldOut: false
+        });
+
+        newItem.save()
+            .then(() => res.json({ success: true }))
+            .catch(err => res.status(500).json({ success: false, message: err.message }));
+    });
 });
 
 app.get('/items', (req, res) => {
